@@ -1,0 +1,50 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db 
+
+data/
+outputs/
+router_classifiers/
+
+#models
+dynamic_routing/models/
+dynamic_routing/pt_models/
+multi_gpu/decoder/
+multi_gpu/encoder/
+multi_gpu/results/decoder/
+multi_gpu/results/encoder/
+
+test.py

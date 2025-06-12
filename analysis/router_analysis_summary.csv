@@ -1,0 +1,373 @@
+layer_type,block,router_type,router_params,num_experts,router_input_dim,router_output_dim,router_weights_shape,router_bias,router_forward_signature,router_class,router_module_path,router_forward_source
+encoder,1,encoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+encoder,3,encoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+encoder,5,encoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+encoder,7,encoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+encoder,9,encoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+encoder,11,encoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+decoder,1,decoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+decoder,3,decoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+decoder,5,decoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+decoder,7,decoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+decoder,9,decoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
+decoder,11,decoder_router,6144,8,768,8,"torch.Size([8, 768])",False,(hidden_states: torch.Tensor) -> Tuple,SwitchTransformersTop1Router,transformers.models.switch_transformers.modeling_switch_transformers.SwitchTransformersTop1Router,"    def forward(self, hidden_states: torch.Tensor) -> Tuple:
+        r""""""
+        Generic forward function for every Router class. Each Router expects to have the same input hidden states
+        (`hidden_states`) corresponding to the hidden states for each token, the `expert_capacity` corresponding to the
+        number of tokens the Router will send to each expert, some Routers can send up to few tokens to each expert.
+
+        Each Router works as the following: it expects the hidden states for each token, gets the `router_probs` and
+        `router_logits` from the `router_weights`. This will assign for each token, the raw probability to be assigned
+        to an expert. Then each Router class will have to define its own `_compute_routing_instructions`.
+
+        Args:
+            hidden_states (`torch.Tensor`) :
+                [num_groups, tokens_per_group, hidden_dim] inputs to send to experts.
+        Returns:
+            Tuple[`torch.Tensor`, `torch.Tensor`, `torch.Tensor`] Tuple containing the expert index, the router probs
+            and the router logits. The router probabilities and logits are required to compute the loss.
+        """"""
+        router_probs, router_logits = self._compute_router_probabilities(hidden_states)
+
+        expert_index = torch.argmax(router_probs, dim=-1)
+        expert_index = torch.nn.functional.one_hot(expert_index, num_classes=self.num_experts)
+
+        # Mask tokens outside expert capacity. Sum over each sequence
+        token_priority = torch.cumsum(expert_index, dim=-2)
+        # mask if the token routed to to the expert will overflow
+        expert_capacity_mask = token_priority <= self.expert_capacity
+        expert_index = expert_index * expert_capacity_mask
+
+        router_probs = torch.max(router_probs, dim=-1).values.unsqueeze(-1)
+        return expert_index, router_probs, router_logits
+"
