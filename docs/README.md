@@ -11,10 +11,10 @@ Switch Transformer 기반 Mixture-of-Experts(MoE) 모델은 추론 효율성과 
 ---
 
 # Key Contributions
-- GPU-Aware Expert 배치: Expert별 latency profiling 결과를 바탕으로, 각 Expert를 최적의 GPU에 정적으로 배치
-- Latency-Aware Top1 Routing: Router Score, Entropy, Token Count 등의 피처를 활용한 MLP 기반 latency 예측 모델로, 실시간 동적 라우팅 수행
-- Hybrid Serving 아키텍처: 정적 Expert 분산 + 동적 라우팅을 통합한 하이브리드 추론 시스템 구현
-- 정량적 평가: 기존 Random, RoundRobin, Uniform 라우팅과 비교 실험을 통해 평균 latency 5.7%~8.0% 개선 확인
+- **GPU-Aware Expert 배치**: Expert별 latency profiling 결과를 바탕으로, 각 Expert를 최적의 GPU에 정적으로 배치
+- **Latency-Aware Top1 Routing**: Router Score, Entropy, Token Count 등의 피처를 활용한 MLP 기반 latency 예측 모델로, 실시간 동적 라우팅 수행
+- **Hybrid Serving 아키텍처**: 정적 Expert 분산 + 동적 라우팅을 통합한 하이브리드 추론 시스템 구현
+- **정량적 평가**: 기존 Random, RoundRobin, Uniform 라우팅과 비교 실험을 통해 평균 latency 5.7%~8.0% 개선 확인
 
 ---
 
