@@ -121,7 +121,7 @@ for expert in df["layer_expert"].unique():
         joblib.dump(scaler, f"{model_dir}/{expert}_scaler.joblib")
 
         # 📈 시각화
-        token_range = np.arange(1, 513, 10)
+        token_range = np.arange(1, 101, 1)
         token_log = np.log1p(token_range).reshape(-1, 1)
         pred_scaled = model.predict(token_log)
         pred_log10 = scaler.inverse_transform(pred_scaled.reshape(-1, 1)).flatten()

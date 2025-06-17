@@ -162,7 +162,15 @@ def simulate_routing(df, models, n_samples=300):
 # ============================
 def visualize_comparison(result_df):
     # 그래프 스타일 설정
-    sns.set(style="whitegrid", font_scale=1.2)
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['axes.grid'] = True
+    plt.rcParams['grid.alpha'] = 0.3
+    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['axes.titlesize'] = 14
+    plt.rcParams['xtick.labelsize'] = 10
+    plt.rcParams['ytick.labelsize'] = 10
+
     # 데이터 준비
     melted_df = result_df.melt(
         id_vars=["layer_index"], 
@@ -170,27 +178,31 @@ def visualize_comparison(result_df):
         var_name="Router", 
         value_name="Latency"
     )
+    
     # 그래프 생성
-    plt.figure(figsize=(10, 6))
-    # 박스플롯 생성 (이상치 표시 제거)
+    plt.figure(figsize=(8, 6))
+    
+    # 박스플롯 생성
     ax = sns.boxplot(
         data=melted_df, 
         x="Router", 
         y="Latency",
         showfliers=False,  # 이상치 표시 제거
+        palette=["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]  # 일관된 색상 사용
     )
+    
     # y축 범위 설정
-    plt.ylim(0.010, 0.025)
+    plt.ylim(0.012, 0.022)
     
     # 제목과 레이블 설정
     plt.title("Latency Comparison of Different Routing Algorithms", 
               fontsize=14, 
-              pad=15)
+              pad=20)
     plt.xlabel("Routing Strategy", fontsize=12)
     plt.ylabel("Latency (ms)", fontsize=12)
     
     # 그리드 설정
-    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.grid(True, linestyle='--', alpha=0.3)
     
     # x축 레이블 회전
     plt.xticks(rotation=0)
@@ -203,50 +215,85 @@ def visualize_comparison(result_df):
     
     # 저장 및 표시
     plt.savefig("results/routing_simulation_result.png", 
-                dpi=300,  # 고해상도
+                dpi=300,
                 bbox_inches='tight',
                 pad_inches=0.2)
-    plt.show()
+    plt.close()
 
 def visualize_more(result_df):
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    import numpy as np
+    # 그래프 스타일 설정
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['axes.grid'] = True
+    plt.rcParams['grid.alpha'] = 0.3
+    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['axes.titlesize'] = 14
+    plt.rcParams['xtick.labelsize'] = 10
+    plt.rcParams['ytick.labelsize'] = 10
 
     # 1. 히스토그램
-    plt.figure(figsize=(10,6))
-    for router in ["LatencyAware", "Random", "RoundRobin", "Uniform"]:
-        sns.histplot(result_df[router], label=router, kde=True, stat="density", element="step", fill=False)
-    plt.legend()
-    plt.title("Latency Distribution by Routing Algorithm")
+    plt.figure(figsize=(8, 6))
+    colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]
+    for i, router in enumerate(["LatencyAware", "Random", "RoundRobin", "Uniform"]):
+        sns.histplot(result_df[router], 
+                    label=router, 
+                    kde=True, 
+                    stat="density", 
+                    element="step", 
+                    fill=False,
+                    color=colors[i],
+                    alpha=0.7)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.title("Latency Distribution by Routing Algorithm", pad=20)
     plt.xlabel("Latency (ms)")
     plt.ylabel("Density")
-    plt.savefig("results/latency_histogram.png")
+    plt.xlim(0.01, 0.03)  # x축 범위 제한
+    plt.grid(True, linestyle='--', alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("results/latency_histogram.png", dpi=300, bbox_inches='tight')
     plt.close()
 
     # 2. 누적분포(CDF)
-    plt.figure(figsize=(10,6))
-    for router in ["LatencyAware", "Random", "RoundRobin", "Uniform"]:
-        sns.ecdfplot(result_df[router], label=router)
-    plt.legend()
-    plt.title("Latency CDF by Routing Algorithm")
+    plt.figure(figsize=(8, 6))
+    for i, router in enumerate(["LatencyAware", "Random", "RoundRobin", "Uniform"]):
+        sns.ecdfplot(result_df[router], 
+                    label=router,
+                    color=colors[i])
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.title("Latency CDF by Routing Algorithm", pad=20)
     plt.xlabel("Latency (ms)")
     plt.ylabel("Cumulative Probability")
-    plt.savefig("results/latency_cdf.png")
+    plt.xlim(0.01, 0.03)  # x축 범위 제한
+    plt.grid(True, linestyle='--', alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("results/latency_cdf.png", dpi=300, bbox_inches='tight')
     plt.close()
 
-    # 4. 개선률 바플롯
+    # 3. 개선률 바플롯
     improvement = {
         "Random": 100 * (result_df["Random"].mean() - result_df["LatencyAware"].mean()) / result_df["Random"].mean(),
         "RoundRobin": 100 * (result_df["RoundRobin"].mean() - result_df["LatencyAware"].mean()) / result_df["RoundRobin"].mean(),
         "Uniform": 100 * (result_df["Uniform"].mean() - result_df["LatencyAware"].mean()) / result_df["Uniform"].mean(),
     }
-    plt.figure(figsize=(8,6))
-    sns.barplot(x=list(improvement.keys()), y=list(improvement.values()))
-    plt.title("Latency Improvement of LatencyAware (%)")
+    
+    plt.figure(figsize=(8, 6))
+    bars = plt.bar(improvement.keys(), 
+                  improvement.values(),
+                  color=["#ff7f0e", "#2ca02c", "#d62728"])
+    
+    # 막대 위에 값 표시
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height,
+                f'{height:.1f}%',
+                ha='center', va='bottom', fontsize=10)
+    
+    plt.title("Latency Improvement of LatencyAware", pad=20)
     plt.ylabel("Improvement (%)")
     plt.xlabel("Compared to")
-    plt.savefig("results/latency_improvement_bar.png")
+    plt.grid(True, linestyle='--', alpha=0.3)
+    plt.tight_layout()
+    plt.savefig("results/latency_improvement_bar.png", dpi=300, bbox_inches='tight')
     plt.close()
 
 # ============================
@@ -256,14 +303,14 @@ if __name__ == "__main__":
     CSV_PATH = "../outputs/router_dataset.csv"
     MODEL_DIR = "models"
 
-    df = pd.read_csv(CSV_PATH)
-    df["gpu_id_encoded"] = df["gpu_id"].map({"1080Ti": 0, "A6000": 1})
+    # df = pd.read_csv(CSV_PATH)
+    # df["gpu_id_encoded"] = df["gpu_id"].map({"1080Ti": 0, "A6000": 1})
 
-    models = load_all_models(MODEL_DIR)
+    # models = load_all_models(MODEL_DIR)
 
-    result_df = simulate_routing(df, models, n_samples=300)
-    result_df.to_csv("results/routing_simulation_result.csv", index=False)
-    print(result_df.describe())
+    # result_df = simulate_routing(df, models, n_samples=300)
+    # result_df.to_csv("results/routing_simulation_result.csv", index=False)
+    # print(result_df.describe())
 
     result_df = pd.read_csv("results/routing_simulation_result.csv")
     visualize_comparison(result_df)

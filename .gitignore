@@ -48,3 +48,5 @@ multi_gpu/results/decoder/
 multi_gpu/results/encoder/
 
 test.py
+expert_routing/
+train_expert_routing.py

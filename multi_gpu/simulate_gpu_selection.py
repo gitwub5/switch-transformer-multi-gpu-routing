@@ -51,79 +51,108 @@ def simulate_execution(df, token_counts):
     return pd.DataFrame(results)
 
 def visualize_results(df_results, token_counts):
-    # 1. 전체 실행 시간 비교 (비율)
+    # 시각화 스타일 설정
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman']
+    plt.rcParams['axes.grid'] = True
+    plt.rcParams['grid.alpha'] = 0.3
+    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['axes.titlesize'] = 14
+    plt.rcParams['xtick.labelsize'] = 10
+    plt.rcParams['ytick.labelsize'] = 10
+
+    # 1. 전체 실행 시간 비교 (ms)
     total_time_1080ti = df_results["1080Ti_latency"].sum()
     total_time_a6000 = df_results["A6000_latency"].sum()
     total_time_with_selection = df_results["best_latency"].sum()
 
-    ratio_1080ti = 100
-    ratio_a6000 = (total_time_a6000 / total_time_1080ti) * 100 if total_time_1080ti else 0
-    ratio_optimal = (total_time_with_selection / total_time_1080ti) * 100 if total_time_1080ti else 0
-
-    plt.figure(figsize=(10, 6))
-    plt.bar(["1080Ti Only", "A6000 Only", "Optimal Selection"],
-            [ratio_1080ti, ratio_a6000, ratio_optimal],
-            color=["red", "blue", "green"])
-    plt.title("Total Execution Time Comparison (Relative to 1080Ti, %)")
-    plt.ylabel("Relative Execution Time (%)")
-    plt.ylim(0, max(110, ratio_1080ti, ratio_a6000, ratio_optimal))
+    plt.figure(figsize=(8, 6))
+    bars = plt.bar(["1080Ti Only", "A6000 Only", "Optimal Selection"],
+            [total_time_1080ti, total_time_a6000, total_time_with_selection],
+            color=["#1f77b4", "#ff7f0e", "#2ca02c"])
+    plt.title("Total Execution Time Comparison", pad=20)
+    plt.ylabel("Execution Time (ms)")
+    
+    # y축 범위를 최소값의 94%에서 최대값의 101%로 제한
+    min_time = min(total_time_1080ti, total_time_a6000, total_time_with_selection)
+    max_time = max(total_time_1080ti, total_time_a6000, total_time_with_selection)
+    plt.ylim(min_time * 0.96, max_time * 1.01)
+    
+    # 막대 위에 값 표시 (소수점 3자리까지)
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height,
+                f'{height:.3f}ms',
+                ha='center', va='bottom', fontsize=10)
+    
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/simulation/total_execution_time_comparison_ratio.png")
+    plt.tight_layout()
+    plt.savefig("results/simulation/total_execution_time_comparison.png", dpi=300, bbox_inches='tight')
     plt.close()
     
     # 2. GPU 선택 분포
     plt.figure(figsize=(8, 6))
-    sns.countplot(data=df_results, x="best_gpu", order=["1080Ti", "A6000", "N/A"])
-    plt.title("GPU Selection Distribution")
+    ax = sns.countplot(data=df_results, x="best_gpu", 
+                      order=["1080Ti", "A6000", "N/A"],
+                      palette={"1080Ti": "#1f77b4", "A6000": "#ff7f0e", "N/A": "#7f7f7f"})
+    plt.title("GPU Selection Distribution", pad=20)
     plt.xlabel("Selected GPU")
     plt.ylabel("Number of Experts")
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/simulation/gpu_selection_distribution.png")
+    plt.tight_layout()
+    plt.savefig("results/simulation/gpu_selection_distribution.png", dpi=300, bbox_inches='tight')
     plt.close()
     
     # 3. 레이어 타입별 GPU 선택 분포
-    plt.figure(figsize=(12, 6))
-    sns.countplot(data=df_results, x="layer_type", hue="best_gpu", 
-                 order=["encoder", "decoder"], hue_order=["1080Ti", "A6000", "N/A"])
-    plt.title("GPU Selection by Layer Type")
+    plt.figure(figsize=(10, 6))
+    ax = sns.countplot(data=df_results, x="layer_type", hue="best_gpu", 
+                      order=["encoder", "decoder"], 
+                      hue_order=["1080Ti", "A6000", "N/A"],
+                      palette={"1080Ti": "#1f77b4", "A6000": "#ff7f0e", "N/A": "#7f7f7f"})
+    plt.title("GPU Selection by Layer Type", pad=20)
     plt.xlabel("Layer Type")
     plt.ylabel("Number of Experts")
-    plt.legend(title="Selected GPU")
+    plt.legend(title="Selected GPU", bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/simulation/gpu_selection_by_layer.png")
+    plt.tight_layout()
+    plt.savefig("results/simulation/gpu_selection_by_layer.png", dpi=300, bbox_inches='tight')
     plt.close()
     
     # 4. 레이턴시 개선률 (1080Ti 대비)
     improvement = (df_results["1080Ti_latency"] - df_results["best_latency"]) / df_results["1080Ti_latency"] * 100
-    plt.figure(figsize=(10, 6))
-    sns.histplot(improvement.dropna(), bins=20)
-    plt.title("Latency Improvement Distribution (vs 1080Ti)")
+    plt.figure(figsize=(8, 6))
+    sns.histplot(improvement.dropna(), bins=20, color="#2ca02c")
+    plt.title("Latency Improvement Distribution\n(vs 1080Ti)", pad=20)
     plt.xlabel("Improvement Percentage (%)")
     plt.ylabel("Number of Experts")
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/simulation/latency_improvement_distribution.png")
+    plt.tight_layout()
+    plt.savefig("results/simulation/latency_improvement_distribution.png", dpi=300, bbox_inches='tight')
     plt.close()
     
     # 5. 레이턴시 비교 산점도 (전체 범위)
-    plt.figure(figsize=(10, 6))
-    plt.scatter(df_results["1080Ti_latency"], df_results["A6000_latency"], alpha=0.5)
+    plt.figure(figsize=(8, 6))
+    plt.scatter(df_results["1080Ti_latency"], df_results["A6000_latency"], 
+                alpha=0.5, color="#1f77b4")
     plt.plot([0, max(df_results["1080Ti_latency"].max(), df_results["A6000_latency"].max())], 
              [0, max(df_results["1080Ti_latency"].max(), df_results["A6000_latency"].max())], 
              'r--', alpha=0.3)
-    plt.title("Latency Comparison: 1080Ti vs A6000 (Full Range)")
+    plt.title("Latency Comparison: 1080Ti vs A6000\n(Full Range)", pad=20)
     plt.xlabel("1080Ti Latency (ms)")
     plt.ylabel("A6000 Latency (ms)")
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/simulation/latency_comparison_scatter_full.png")
+    plt.tight_layout()
+    plt.savefig("results/simulation/latency_comparison_scatter_full.png", dpi=300, bbox_inches='tight')
     plt.close()
     
     # 6. 레이턴시 비교 산점도 (확대 범위)
-    plt.figure(figsize=(10, 6))
-    plt.scatter(df_results["1080Ti_latency"], df_results["A6000_latency"], alpha=0.5)
+    plt.figure(figsize=(8, 6))
+    plt.scatter(df_results["1080Ti_latency"], df_results["A6000_latency"], 
+                alpha=0.5, color="#1f77b4")
     plt.plot([0, max(df_results["1080Ti_latency"].max(), df_results["A6000_latency"].max())], 
              [0, max(df_results["1080Ti_latency"].max(), df_results["A6000_latency"].max())], 
              'r--', alpha=0.3)
-    plt.title("Latency Comparison: 1080Ti vs A6000 (Zoomed)")
+    plt.title("Latency Comparison: 1080Ti vs A6000\n(Zoomed)", pad=20)
     plt.xlabel("1080Ti Latency (ms)")
     plt.ylabel("A6000 Latency (ms)")
     
@@ -134,35 +163,39 @@ def visualize_results(df_results, token_counts):
     plt.ylim(0, y_95)
     
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/simulation/latency_comparison_scatter_zoomed.png")
+    plt.tight_layout()
+    plt.savefig("results/simulation/latency_comparison_scatter_zoomed.png", dpi=300, bbox_inches='tight')
     plt.close()
     
-    # 7. 레이턴시 비교 산점도 (히트맵)
-    plt.figure(figsize=(10, 6))
+    # 7. 레이턴시 비교 히트맵
+    plt.figure(figsize=(8, 6))
     plt.hist2d(df_results["1080Ti_latency"], df_results["A6000_latency"], 
                bins=50, cmap='viridis')
     plt.colorbar(label='Count')
     plt.plot([0, max(df_results["1080Ti_latency"].max(), df_results["A6000_latency"].max())], 
              [0, max(df_results["1080Ti_latency"].max(), df_results["A6000_latency"].max())], 
              'r--', alpha=0.3)
-    plt.title("Latency Comparison: 1080Ti vs A6000 (Heatmap)")
+    plt.title("Latency Comparison: 1080Ti vs A6000\n(Heatmap)", pad=20)
     plt.xlabel("1080Ti Latency (ms)")
     plt.ylabel("A6000 Latency (ms)")
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/simulation/latency_comparison_heatmap.png")
+    plt.tight_layout()
+    plt.savefig("results/simulation/latency_comparison_heatmap.png", dpi=300, bbox_inches='tight')
     plt.close()
     
     # 8. 레이턴시 비교 산점도 (0.015~0.020 확대)
-    plt.figure(figsize=(10, 6))
-    plt.scatter(df_results["1080Ti_latency"], df_results["A6000_latency"], alpha=0.5)
+    plt.figure(figsize=(8, 6))
+    plt.scatter(df_results["1080Ti_latency"], df_results["A6000_latency"], 
+                alpha=0.5, color="#1f77b4")
     plt.plot([0.015, 0.020], [0.015, 0.020], 'r--', alpha=0.3)
-    plt.title("Latency Comparison: 1080Ti vs A6000 (0.015~0.020 Zoomed)")
+    plt.title("Latency Comparison: 1080Ti vs A6000\n(0.015~0.020 Zoomed)", pad=20)
     plt.xlabel("1080Ti Latency (ms)")
     plt.ylabel("A6000 Latency (ms)")
     plt.xlim(0.015, 0.020)
     plt.ylim(0.015, 0.020)
     plt.grid(True, alpha=0.3)
-    plt.savefig("results/simulation/latency_comparison_scatter_0015_0020.png")
+    plt.tight_layout()
+    plt.savefig("results/simulation/latency_comparison_scatter_0015_0020.png", dpi=300, bbox_inches='tight')
     plt.close()
 
 def main():
